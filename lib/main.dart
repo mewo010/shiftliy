@@ -9,6 +9,7 @@ import 'views/calendar_screen.dart';
 import 'views/analytics_screen.dart';
 import 'views/review_shift_sheet.dart';
 import 'views/smart_paste_dialog.dart';
+import 'views/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +60,7 @@ class ShiftlyApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
       themeMode: ThemeMode.system,
-      home: const ShiftlyHomeScreen(),
+      home: const ShiftlySplashScreen(),
     );
   }
 }
@@ -193,16 +194,39 @@ class _ShiftlyHomeScreenState extends State<ShiftlyHomeScreen> {
 
           return Scaffold(
             appBar: AppBar(
-              title: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              title: Row(
                 children: [
-                  Text(
-                    'Shiftly',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset(
+                      'assets/images/app_icon.jpg',
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.access_time_filled, color: Colors.white, size: 20),
+                      ),
+                    ),
                   ),
-                  Text(
-                    'מעקב שעות ושכר חכם',
-                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                  const SizedBox(width: 10),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Shiftly',
+                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+                      ),
+                      Text(
+                        'מעקב שעות ושכר חכם',
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -247,10 +271,48 @@ class _ShiftlyHomeScreenState extends State<ShiftlyHomeScreen> {
                         ],
                       ),
                       const VerticalDivider(thickness: 1, width: 1),
-                      Expanded(child: screens[_currentIndex]),
+                      Expanded(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 250),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          transitionBuilder: (child, animation) => FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.02, 0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          ),
+                          child: KeyedSubtree(
+                            key: ValueKey<int>(_currentIndex),
+                            child: screens[_currentIndex],
+                          ),
+                        ),
+                      ),
                     ],
                   )
-                : screens[_currentIndex],
+                : AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.02, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    ),
+                    child: KeyedSubtree(
+                      key: ValueKey<int>(_currentIndex),
+                      child: screens[_currentIndex],
+                    ),
+                  ),
             bottomNavigationBar: isWideScreen
                 ? null
                 : NavigationBar(

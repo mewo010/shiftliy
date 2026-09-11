@@ -124,29 +124,75 @@ class _TimerScreenState extends State<TimerScreen> {
                     const SizedBox(height: 12),
                   ],
 
-                  // Big Timer Digits
+                  // Big Timer Digits with Glow
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    padding: const EdgeInsets.symmetric(vertical: 22),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.35),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outlineVariant,
+                        color: isRunning
+                            ? (isBreak ? const Color(0xFFF59E0B) : Theme.of(context).colorScheme.primary)
+                            : Theme.of(context).colorScheme.outlineVariant,
+                        width: isRunning ? 2 : 1,
                       ),
+                      boxShadow: isRunning
+                          ? [
+                              BoxShadow(
+                                color: (isBreak ? const Color(0xFFF59E0B) : Theme.of(context).colorScheme.primary)
+                                    .withOpacity(0.2),
+                                blurRadius: 18,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                          : null,
                     ),
                     alignment: Alignment.center,
-                    child: Text(
-                      timerString,
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'monospace',
-                        letterSpacing: 2,
-                        color: isBreak
-                            ? const Color(0xFFF59E0B)
-                            : Theme.of(context).colorScheme.primary,
-                      ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isRunning
+                                    ? (isBreak ? const Color(0xFFF59E0B) : Colors.green)
+                                    : Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              isRunning
+                                  ? (isBreak ? 'בהפסקה' : 'משמרת פעילה')
+                                  : 'המשמרת טרם החלה',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isRunning
+                                    ? (isBreak ? const Color(0xFFD97706) : Theme.of(context).colorScheme.primary)
+                                    : Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          timerString,
+                          style: TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'monospace',
+                            letterSpacing: 2,
+                            color: isBreak
+                                ? const Color(0xFFF59E0B)
+                                : Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 

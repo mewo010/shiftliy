@@ -1,26 +1,35 @@
 package com.example.shiftly.ui
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.R
 import com.example.shiftly.data.model.Shift
 import com.example.shiftly.ui.components.RateSettingsDialog
 import com.example.shiftly.ui.components.ReviewShiftSheet
+import com.example.shiftly.ui.components.ShiftlySplashScreen
 import com.example.shiftly.ui.components.SmartPasteDialog
 import com.example.shiftly.ui.screens.AnalyticsScreen
 import com.example.shiftly.ui.screens.CalendarScreen
 import com.example.shiftly.ui.screens.TimerScreen
 import com.example.shiftly.viewmodel.ShiftViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -46,24 +55,53 @@ fun ShiftlyApp(viewModel: ShiftViewModel) {
         var currentTab by remember { mutableStateOf(ShiftlyTab.TIMER) }
         var showSmartPasteDialog by remember { mutableStateOf(false) }
         var showRateSettingsDialog by remember { mutableStateOf(false) }
+        var showSplash by remember { mutableStateOf(true) }
+
+        LaunchedEffect(Unit) {
+            delay(1500)
+            showSplash = false
+        }
 
         val snackbarHostState = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
 
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Column {
-                            Text(
-                                text = "Shiftly",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
+        Crossfade(targetState = showSplash, label = "SplashTransition") { isSplash ->
+            if (isSplash) {
+                ShiftlySplashScreen()
+            } else {
+                Scaffold(
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                    topBar = {
+                        CenterAlignedTopAppBar(
+                            title = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.shiftly_app_icon_1789153502665),
+                                        contentDescription = "Shiftly Logo",
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(RoundedCornerShape(8.dp)),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column {
+                                        Text(
+                                            text = "Shiftly",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "מעקב שעות ושכר חכם",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            },
                     actions = {
                         // Smart Paste Button
                         FilledTonalButton(
@@ -220,6 +258,7 @@ fun ShiftlyApp(viewModel: ShiftViewModel) {
                 }
             }
         }
+        }
 
         // Review Mode Sheet
         if (reviewingShift != null) {
@@ -274,4 +313,5 @@ fun ShiftlyApp(viewModel: ShiftViewModel) {
             )
         }
     }
+}
 }
