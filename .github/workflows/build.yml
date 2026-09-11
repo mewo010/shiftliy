@@ -37,6 +37,62 @@ jobs:
       - name: Auto-generate Android Platform
         run: flutter create . --platforms=android
 
+      - name: Enable Core Library Desugaring
+        run: |
+          if [ -f android/app/build.gradle ]; then
+            python3 -c "
+          with open('android/app/build.gradle', 'r') as f:
+              content = f.read()
+
+          if 'coreLibraryDesugaringEnabled' not in content:
+              if 'compileOptions {' in content:
+                  content = content.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
+              else:
+                  content = content.replace('android {', 'android {\n    compileOptions {\n        coreLibraryDesugaringEnabled true\n        sourceCompatibility JavaVersion.VERSION_1_8\n        targetCompatibility JavaVersion.VERSION_1_8\n    }')
+
+          if 'multiDexEnabled' not in content:
+              if 'defaultConfig {' in content:
+                  content = content.replace('defaultConfig {', 'defaultConfig {\n        multiDexEnabled true')
+
+          if 'desugar_jdk_libs' not in content:
+              if 'dependencies {' in content:
+                  content = content.replace('dependencies {', 'dependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.1.4\"')
+              else:
+                  content += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.1.4\"\n}\n'
+
+          with open('android/app/build.gradle', 'w') as f:
+              f.write(content)
+          print('Updated android/app/build.gradle with desugaring configuration.')
+          "
+          fi
+
+          if [ -f android/app/build.gradle.kts ]; then
+            python3 -c "
+          with open('android/app/build.gradle.kts', 'r') as f:
+              content = f.read()
+
+          if 'isCoreLibraryDesugaringEnabled' not in content and 'coreLibraryDesugaringEnabled' not in content:
+              if 'compileOptions {' in content:
+                  content = content.replace('compileOptions {', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true')
+              else:
+                  content = content.replace('android {', 'android {\n    compileOptions {\n        isCoreLibraryDesugaringEnabled = true\n    }')
+
+          if 'multiDexEnabled' not in content:
+              if 'defaultConfig {' in content:
+                  content = content.replace('defaultConfig {', 'defaultConfig {\n        multiDexEnabled = true')
+
+          if 'desugar_jdk_libs' not in content:
+              if 'dependencies {' in content:
+                  content = content.replace('dependencies {', 'dependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.1.4\")')
+              else:
+                  content += '\ndependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.1.4\")\n}\n'
+
+          with open('android/app/build.gradle.kts', 'w') as f:
+              f.write(content)
+          print('Updated android/app/build.gradle.kts with desugaring configuration.')
+          "
+          fi
+
       - name: Install Dependencies
         run: flutter pub get
 
