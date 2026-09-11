@@ -207,7 +207,7 @@ class _ShiftlyHomeScreenState extends State<ShiftlyHomeScreen> {
                 ],
               ),
               actions: [
-                FilledTonalButton.icon(
+                FilledButton.tonalIcon(
                   onPressed: () => _showSmartPasteDialog(context, provider),
                   icon: const Icon(Icons.content_paste, size: 16),
                   label: const Text('הדבקה מ-WhatsApp', style: TextStyle(fontSize: 12)),

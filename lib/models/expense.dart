@@ -1,8 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 
-part 'expense.g.dart';
-
 @HiveType(typeId: 1)
 class Expense extends HiveObject {
   @HiveField(0)

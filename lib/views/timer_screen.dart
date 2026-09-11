@@ -55,7 +55,7 @@ class _TimerScreenState extends State<TimerScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   color: !isRunning
-                      ? Theme.of(context).colorScheme.surfaceVariant
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
                       : (isBreak ? const Color(0xFFFEF3C7) : const Color(0xFFD1FAE5)),
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -156,7 +156,7 @@ class _TimerScreenState extends State<TimerScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -288,7 +288,7 @@ class _TimerScreenState extends State<TimerScreen> {
           if (!isRunning) ...[
             Card(
               shape: RoundedCornerShape(18),
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -341,11 +341,11 @@ class _TimerScreenState extends State<TimerScreen> {
                             shape: RoundedCornerShape(16),
                           ),
                         )
-                      : FilledTonalButton.icon(
+                      : FilledButton.tonalIcon(
                           onPressed: provider.pauseForBreak,
                           icon: const Icon(Icons.coffee),
                           label: const Text('צא להפסקה'),
-                          style: FilledTonalButton.styleFrom(
+                          style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedCornerShape(16),
                           ),

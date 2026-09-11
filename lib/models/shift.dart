@@ -2,8 +2,6 @@ import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import 'expense.dart';
 
-part 'shift.g.dart';
-
 @HiveType(typeId: 0)
 class Shift extends HiveObject {
   @HiveField(0)

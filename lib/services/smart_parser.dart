@@ -3,17 +3,19 @@ import '../models/shift.dart';
 class SmartParser {
   static const int defaultYear = 2026;
 
+  // Regex pattern matching dates like DD.MM.YYYY or DD.MM, followed by start and end times
   static final RegExp _lineRegex = RegExp(
-    r'(?<day>\d{1,2})[./](?<month>\d{1,2})(?:[./](?<year>\d{2,4}))?'
-    r'\s*[-–—:\s]\s*'
-    r'(?<startH>\d{1,2}):(?<startM>\d{2})'
-    r'\s*[-–—:\s]\s*'
-    r'(?<endH>\d{1,2}):(?<endM>\d{2})'
-    r'(?<remainder>.*)',
+    r'(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?'
+    r'\s*[-\u2013\u2014:\s]\s*'
+    r'(\d{1,2}):(\d{2})'
+    r'\s*[-\u2013\u2014:\s]\s*'
+    r'(\d{1,2}):(\d{2})'
+    r'(.*)',
+    caseSensitive: false,
   );
 
   static final RegExp _breakRegex = RegExp(
-    r'(\d+)\s*(?:דקות|דק[\'״]|min|minutes)?',
+    r'(\d+)\s*(?:דקות|דק|\'|״|"|min|minutes)?',
     caseSensitive: false,
   );
 
@@ -35,17 +37,17 @@ class SmartParser {
     final match = _lineRegex.firstMatch(trimmed);
     if (match == null) return null;
 
-    final day = int.tryParse(match.namedGroup('day') ?? '');
-    final month = int.tryParse(match.namedGroup('month') ?? '');
-    var year = int.tryParse(match.namedGroup('year') ?? '') ?? defaultYear;
+    final day = int.tryParse(match.group(1) ?? '');
+    final month = int.tryParse(match.group(2) ?? '');
+    var year = int.tryParse(match.group(3) ?? '') ?? defaultYear;
     if (year < 100) {
       year += 2000;
     }
 
-    final startH = int.tryParse(match.namedGroup('startH') ?? '');
-    final startM = int.tryParse(match.namedGroup('startM') ?? '');
-    final endH = int.tryParse(match.namedGroup('endH') ?? '');
-    final endM = int.tryParse(match.namedGroup('endM') ?? '');
+    final startH = int.tryParse(match.group(4) ?? '');
+    final startM = int.tryParse(match.group(5) ?? '');
+    final endH = int.tryParse(match.group(6) ?? '');
+    final endM = int.tryParse(match.group(7) ?? '');
 
     if (day == null || month == null || startH == null || startM == null || endH == null || endM == null) {
       return null;
@@ -59,7 +61,7 @@ class SmartParser {
       endDateTime = endDateTime.add(const Duration(days: 1));
     }
 
-    final remainder = (match.namedGroup('remainder') ?? '').trim();
+    final remainder = (match.group(8) ?? '').trim();
     int breakMinutes = 0;
     double tips = 0.0;
 
