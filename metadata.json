@@ -1,0 +1,6 @@
+{
+  "name": "Shiftly",
+  "description": "מעקב משמרות ושעות עבודה חכם בעברית - Shiftly. טיימר משמרת חי, חישוב שכר והפסקה, הדבקה חכמה מוואטסאפ, יומן חודשי ואנליטיקה.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
