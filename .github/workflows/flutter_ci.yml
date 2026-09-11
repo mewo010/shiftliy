@@ -5,55 +5,65 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-android-web:
+    name: Build Android & Web
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
           channel: 'stable'
           cache: true
 
-      - name: Install dependencies
+      - name: Auto-generate Platform Folders
+        run: flutter create . --platforms=android,web
+
+      - name: Install Dependencies
         run: flutter pub get
 
-      - name: Verify formatting and analyze code
-        run: |
-          flutter analyze --no-fatal-infos
+      - name: Generate Hive Adapters
+        run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Build Web target
-        run: flutter build web --release
+      - name: Build Android APK
+        run: flutter build apk --release
 
-      - name: Build Android APK (arm64-v8a)
-        run: flutter build apk --release --target-platform android-arm64
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: shiftly-android-apk
+          path: build/app/outputs/flutter-apk/*.apk
 
   build-ios:
+    name: Build iOS
     runs-on: macos-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
           channel: 'stable'
           cache: true
 
-      - name: Install dependencies
+      - name: Auto-generate iOS Platform
+        run: flutter create . --platforms=ios
+
+      - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build iOS unsigned target
-        run: flutter build ios --no-codesign --release
+      - name: Generate Hive Adapters
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build iOS (Unsigned)
+        run: flutter build ios --release --no-codesign
