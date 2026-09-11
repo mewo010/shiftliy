@@ -3,7 +3,6 @@ import '../models/shift.dart';
 class SmartParser {
   static const int defaultYear = 2026;
 
-  // Regex pattern matching dates like DD.MM.YYYY or DD.MM, followed by start and end times
   static final RegExp _lineRegex = RegExp(
     r'(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?'
     r'\s*[-\u2013\u2014:\s]\s*'
@@ -29,7 +28,6 @@ class SmartParser {
     caseSensitive: false,
   );
 
-  /// Parse a single line of freeform shift log.
   static Shift? parseLine(String rawLine, {double defaultHourlyRate = 45.0}) {
     final trimmed = rawLine.trim();
     if (trimmed.isEmpty) return null;
@@ -56,7 +54,6 @@ class SmartParser {
     final startDateTime = DateTime(year, month, day, startH, startM);
     var endDateTime = DateTime(year, month, day, endH, endM);
 
-    // Cross-midnight / night shifts: e.g., 22:00 - 06:00 wraps to the next calendar day
     if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
       endDateTime = endDateTime.add(const Duration(days: 1));
     }
@@ -93,7 +90,6 @@ class SmartParser {
     );
   }
 
-  /// Parse multiple lines (e.g. from WhatsApp messages).
   static List<Shift> parseMultiple(String text, {double defaultHourlyRate = 45.0}) {
     final results = <Shift>[];
     final lines = text.split(RegExp(r'[\r\n;]+'));
