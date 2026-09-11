@@ -1,18 +1,23 @@
-name: Build Shiftly Multi-Platform
+name: Shiftly Multi-Platform Build & Release
 
 on:
   push:
     branches: [ main, master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  # -------------------------------------------------------------
-  # 1. BUILD ANDROID, LINUX & WEB (Ubuntu Runner)
-  # -------------------------------------------------------------
-  build-ubuntu:
-    name: Build Android, Linux & Web
+  # =============================================================
+  # 1. ANDROID PLATFORM
+  # =============================================================
+  build-android:
+    name: Build Android (APK)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +28,43 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Linux Dependencies
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Auto-generate Android Platform
+        run: flutter create . --platforms=android
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters & Code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Prepare Android Assets
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk dist/shiftly-android.apk
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shiftly-android
+          path: dist/shiftly-android.apk
+
+  # =============================================================
+  # 2. IOS PLATFORM
+  # =============================================================
+  build-ios:
+    name: Build iOS (IPA & App)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -34,46 +72,40 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Auto-generate Platforms
-        run: flutter create . --platforms=android,linux,web
+      - name: Auto-generate iOS Platform
+        run: flutter create . --platforms=ios
 
-      - name: Install Dependencies & Run Build Runner
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters & Code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build iOS (Unsigned)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package iOS Artifacts
         run: |
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
+          mkdir -p dist/Payload
+          cp -r build/ios/iphoneos/Runner.app dist/Payload/
+          cd dist
+          zip -r shiftly-ios.ipa Payload
+          cd ..
+          zip -r dist/shiftly-ios-app.zip build/ios/iphoneos/Runner.app
 
-      - name: Build Android APK
-        run: flutter build apk --release --split-per-abi
-
-      - name: Build Linux Desktop
-        run: flutter build linux --release
-
-      - name: Build Web
-        run: flutter build web --release
-
-      - name: Upload Android APK
+      - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shiftly-android-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          name: shiftly-ios
+          path: |
+            dist/shiftly-ios.ipa
+            dist/shiftly-ios-app.zip
 
-      - name: Upload Linux Bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: shiftly-linux-app
-          path: build/linux/x64/release/bundle/
-
-      - name: Upload Web Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: shiftly-web-bundle
-          path: build/web/
-
-  # -------------------------------------------------------------
-  # 2. BUILD WINDOWS DESKTOP (Windows Runner)
-  # -------------------------------------------------------------
+  # =============================================================
+  # 3. WINDOWS PLATFORM
+  # =============================================================
   build-windows:
-    name: Build Windows App
+    name: Build Windows (EXE Zip)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,25 +119,32 @@ jobs:
       - name: Auto-generate Windows Platform
         run: flutter create . --platforms=windows
 
-      - name: Install Dependencies & Run Build Runner
-        run: |
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters & Code
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build Windows Desktop
         run: flutter build windows --release
 
-      - name: Upload Windows Executable
+      - name: Package Windows Artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath dist\shiftly-windows-x64.zip
+
+      - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shiftly-windows-app
-          path: build/windows/x64/runner/Release/
+          name: shiftly-windows
+          path: dist/shiftly-windows-x64.zip
 
-  # -------------------------------------------------------------
-  # 3. BUILD IOS & MACOS (macOS Runner)
-  # -------------------------------------------------------------
-  build-apple:
-    name: Build iOS & macOS
+  # =============================================================
+  # 4. MACOS PLATFORM
+  # =============================================================
+  build-macos:
+    name: Build macOS (App Zip)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -116,28 +155,157 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Auto-generate Apple Platforms
-        run: flutter create . --platforms=ios,macos
+      - name: Auto-generate macOS Platform
+        run: flutter create . --platforms=macos
 
-      - name: Install Dependencies & Run Build Runner
-        run: |
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters & Code
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build macOS Desktop
         run: flutter build macos --release
 
-      - name: Build iOS (No Sign)
-        run: flutter build ios --release --no-codesign
+      - name: Package macOS Artifacts
+        run: |
+          mkdir -p dist
+          cd build/macos/Build/Products/Release
+          zip -r ../../../../../dist/shiftly-macos.zip *.app
 
-      - name: Upload macOS App
+      - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shiftly-macos-app
-          path: build/macos/Build/Products/Release/
+          name: shiftly-macos
+          path: dist/shiftly-macos.zip
 
-      - name: Upload iOS Runner Payload
+  # =============================================================
+  # 5. LINUX PLATFORM
+  # =============================================================
+  build-linux:
+    name: Build Linux (GTK Bundle)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Auto-generate Linux Platform
+        run: flutter create . --platforms=linux
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters & Code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Linux Desktop
+        run: flutter build linux --release
+
+      - name: Package Linux Artifacts
+        run: |
+          mkdir -p dist
+          tar -czvf dist/shiftly-linux-x64.tar.gz -C build/linux/x64/release/bundle .
+
+      - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shiftly-ios-app
-          path: build/ios/iphoneos/Runner.app
+          name: shiftly-linux
+          path: dist/shiftly-linux-x64.tar.gz
+
+  # =============================================================
+  # 6. WEB PLATFORM
+  # =============================================================
+  build-web:
+    name: Build Web (HTML/JS Zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Auto-generate Web Platform
+        run: flutter create . --platforms=web
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters & Code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Web
+        run: flutter build web --release
+
+      - name: Package Web Artifacts
+        run: |
+          mkdir -p dist
+          cd build/web
+          zip -r ../../dist/shiftly-web.zip .
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shiftly-web
+          path: dist/shiftly-web.zip
+
+  # =============================================================
+  # 7. UPLOAD TO GITHUB RELEASES TAB
+  # =============================================================
+  release:
+    name: Publish to GitHub Releases Tab
+    needs:
+      - build-android
+      - build-ios
+      - build-windows
+      - build-macos
+      - build-linux
+      - build-web
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_assets
+          merge-multiple: true
+
+      - name: Display Release Assets
+        run: ls -la release_assets/
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Shiftly Release v1.0.0' }}
+          body: |
+            ### 🚀 Shiftly Multi-Platform Release
+
+            All application builds across platforms:
+            * 🤖 **Android**: `shiftly-android.apk`
+            * 🍏 **iOS**: `shiftly-ios.ipa` & `shiftly-ios-app.zip` (Unsigned Runner)
+            * 🪟 **Windows**: `shiftly-windows-x64.zip` (Standalone Executable Bundle)
+            * 🍎 **macOS**: `shiftly-macos.zip` (macOS Application)
+            * 🐧 **Linux**: `shiftly-linux-x64.tar.gz` (GTK x64 Bundle)
+            * 🌐 **Web**: `shiftly-web.zip` (Web distribution assets)
+          files: release_assets/*
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
