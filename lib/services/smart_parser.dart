@@ -15,7 +15,7 @@ class SmartParser {
   );
 
   static final RegExp _breakRegex = RegExp(
-    r'(\d+)\s*(?:דקות|דק|\'|״|"|min|minutes)?',
+    r'(\d+)\s*(?:דקות|דק|\'|\"|min|minutes)?',
     caseSensitive: false,
   );
 
