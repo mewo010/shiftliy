@@ -68,13 +68,20 @@ class _SmartPasteDialogState extends State<SmartPasteDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.content_paste, color: Color(0xFF10B981)),
-                      SizedBox(width: 8),
-                      Text('הדבקה חכמה מ-WhatsApp',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    ],
+                  const Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.content_paste, color: Color(0xFF10B981)),
+                        SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'הדבקה חכמה מ-WhatsApp',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -86,8 +93,14 @@ class _SmartPasteDialogState extends State<SmartPasteDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('פורמט: [תאריך] - [כניסה] - [יציאה] [הפסקה] + [טיפ]',
-                      style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  const Expanded(
+                    child: Text(
+                      'פורמט: [תאריך] - [כניסה] - [יציאה] [הפסקה] + [טיפ]',
+                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
                   TextButton(
                     onPressed: () {
                       _textController.text = sampleText.trim();

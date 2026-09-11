@@ -5,16 +5,16 @@ class SmartParser {
 
   static final RegExp _lineRegex = RegExp(
     r'(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?'
-    r'\s*[-\u2013\u2014:\s]\s*'
+    r'\s*[-–—:\s]\s*'
     r'(\d{1,2}):(\d{2})'
-    r'\s*[-\u2013\u2014:\s]\s*'
+    r'\s*[-–—:\s]\s*'
     r'(\d{1,2}):(\d{2})'
     r'(.*)',
     caseSensitive: false,
   );
 
   static final RegExp _breakRegex = RegExp(
-    r'(\d+)\s*(?:דקות|דק|\'|\"|min|minutes)?',
+    '(\\d+)\\s*(?:דקות|דק|\'|"|׳|״|min|minutes)?',
     caseSensitive: false,
   );
 

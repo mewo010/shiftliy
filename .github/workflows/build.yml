@@ -34,6 +34,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Auto-generate Platforms
+        run: flutter create . --platforms=android,linux,web
+
       - name: Install Dependencies & Run Build Runner
         run: |
           flutter pub get
@@ -44,6 +47,9 @@ jobs:
 
       - name: Build Linux Desktop
         run: flutter build linux --release
+
+      - name: Build Web
+        run: flutter build web --release
 
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
@@ -56,6 +62,12 @@ jobs:
         with:
           name: shiftly-linux-app
           path: build/linux/x64/release/bundle/
+
+      - name: Upload Web Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: shiftly-web-bundle
+          path: build/web/
 
   # -------------------------------------------------------------
   # 2. BUILD WINDOWS DESKTOP (Windows Runner)
@@ -71,6 +83,9 @@ jobs:
         with:
           channel: 'stable'
           cache: true
+
+      - name: Auto-generate Windows Platform
+        run: flutter create . --platforms=windows
 
       - name: Install Dependencies & Run Build Runner
         run: |
@@ -101,6 +116,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Auto-generate Apple Platforms
+        run: flutter create . --platforms=ios,macos
+
       - name: Install Dependencies & Run Build Runner
         run: |
           flutter pub get
@@ -109,7 +127,6 @@ jobs:
       - name: Build macOS Desktop
         run: flutter build macos --release
 
-      # iOS Build without code-signing (produces app payload for manual testing or TestFlight)
       - name: Build iOS (No Sign)
         run: flutter build ios --release --no-codesign
 

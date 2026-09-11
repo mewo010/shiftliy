@@ -162,23 +162,26 @@ class _TimerScreenState extends State<TimerScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              (isRunning ? provider.activeShift?.isBreakPaid == true : _isBreakPaidPreference)
-                                  ? 'הפסקה בתשלום'
-                                  : 'הפסקה ללא תשלום',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              (isRunning ? provider.activeShift?.isBreakPaid == true : _isBreakPaidPreference)
-                                  ? 'זמן ההפסקה נספר בשכר השעתי'
-                                  : 'זמן ההפסקה מקוזז מהשכר',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                (isRunning ? provider.activeShift?.isBreakPaid == true : _isBreakPaidPreference)
+                                    ? 'הפסקה בתשלום'
+                                    : 'הפסקה ללא תשלום',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                (isRunning ? provider.activeShift?.isBreakPaid == true : _isBreakPaidPreference)
+                                    ? 'זמן ההפסקה נספר בשכר השעתי'
+                                    : 'זמן ההפסקה מקוזז מהשכר',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Switch(
                           value: isRunning
                               ? (provider.activeShift?.isBreakPaid ?? false)
@@ -235,45 +238,54 @@ class _TimerScreenState extends State<TimerScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '₪${liveEstimatedPay.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              color: Theme.of(context).colorScheme.primary,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '₪${liveEstimatedPay.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w900,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          Text(
-                            'שכר נטו משוער (ללא טיפים)',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                            Text(
+                              'שכר נטו משוער (ללא טיפים)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${liveNetHours.toStringAsFixed(2)} שעות',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${liveNetHours.toStringAsFixed(2)} שעות',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          Text(
-                            'שעות עבודה נטו',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                            Text(
+                              'שעות עבודה נטו',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

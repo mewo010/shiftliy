@@ -251,11 +251,28 @@ class _ReviewShiftSheetState extends State<ReviewShiftSheet> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('הפסקה בתשלום', style: TextStyle(fontSize: 12)),
-                      value: _isBreakPaid,
-                      onChanged: (val) => setState(() => _isBreakPaid = val),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Flexible(
+                            child: Text(
+                              'הפסקה בתשלום',
+                              style: TextStyle(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Switch(
+                            value: _isBreakPaid,
+                            onChanged: (val) => setState(() => _isBreakPaid = val),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
